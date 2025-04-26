@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    environment {
+        MONGODB_URI = credentials('MONGODB_URI')
+        JWT_SECRET = credentials('JWT_SECRET')
+        FRONTEND_BASE_URL = 'http://localhost:3000'
+        BACKEND_BASE_URL = 'http://localhost:5000'
+        FIREBASE_API_KEY = credentials('FIREBASE_API_KEY')
+    }
+
     stages {
         stage('Clean Workspace') {
             steps {
@@ -17,7 +25,13 @@ pipeline {
         stage('Build Docker Containers') {
             steps {
                 script {
-                    bat 'docker-compose build'
+                    // Load environment variables from .env files if they exist
+                    if (fileExists('.env')) {
+                        load '.env'
+                    }
+                    
+                    // Build the containers
+                    bat 'docker-compose -f docker-compose.yml build --no-cache'
                 }
             }
         }
@@ -25,7 +39,7 @@ pipeline {
         stage('Run Containers') {
             steps {
                 script {
-                    bat 'docker-compose up -d'
+                    bat 'docker-compose -f docker-compose.yml up -d'
                 }
             }
         }
@@ -42,6 +56,15 @@ pipeline {
     post {
         always {
             echo 'Pipeline execution completed.'
+            script {
+                bat 'docker-compose -f docker-compose.yml down'
+            }
+        }
+        failure {
+            echo 'Pipeline failed! Cleaning up...'
+        }
+        success {
+            echo 'Pipeline succeeded!'
         }
     }
 }

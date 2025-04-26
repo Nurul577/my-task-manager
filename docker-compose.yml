@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   backend:
+    container_name: task-manager-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -11,12 +12,22 @@ services:
       - ./backend:/app
     environment:
       - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+    restart: unless-stopped
 
   frontend:
+    container_name: task-manager-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80" # Bind port 3000 on the host to port 80 in the container
+      - "3000:80"
     environment:
       - NODE_ENV=production
+      - VITE_BACKEND_BASE_URL=${BACKEND_BASE_URL}
+      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
+    depends_on:
+      - backend
+    restart: unless-stopped
