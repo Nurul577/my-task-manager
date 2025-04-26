@@ -2,11 +2,12 @@ pipeline {
     agent any
 
     environment {
+        // Define credentials using Jenkins credentials binding
         MONGODB_URI = credentials('MONGODB_URI')
         JWT_SECRET = credentials('JWT_SECRET')
+        FIREBASE_API_KEY = credentials('FIREBASE_API_KEY')
         FRONTEND_BASE_URL = 'http://localhost:3000'
         BACKEND_BASE_URL = 'http://localhost:5000'
-        FIREBASE_API_KEY = credentials('FIREBASE_API_KEY')
     }
 
     stages {
@@ -25,10 +26,14 @@ pipeline {
         stage('Build Docker Containers') {
             steps {
                 script {
-                    // Load environment variables from .env files if they exist
-                    if (fileExists('.env')) {
-                        load '.env'
-                    }
+                    // Write environment variables to .env file
+                    writeFile file: '.env', text: """
+                        MONGODB_URI=${MONGODB_URI}
+                        JWT_SECRET=${JWT_SECRET}
+                        FIREBASE_API_KEY=${FIREBASE_API_KEY}
+                        FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+                        BACKEND_BASE_URL=${BACKEND_BASE_URL}
+                    """.trim()
                     
                     // Build the containers
                     bat 'docker-compose -f docker-compose.yml build --no-cache'
@@ -55,16 +60,26 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline execution completed.'
-            script {
-                bat 'docker-compose -f docker-compose.yml down'
+            node {
+                echo 'Pipeline execution completed.'
+                script {
+                    try {
+                        bat 'docker-compose -f docker-compose.yml down'
+                    } catch (Exception e) {
+                        echo "Warning: Failed to stop containers: ${e.message}"
+                    }
+                }
             }
         }
         failure {
-            echo 'Pipeline failed! Cleaning up...'
+            node {
+                echo 'Pipeline failed! Cleaning up...'
+            }
         }
         success {
-            echo 'Pipeline succeeded!'
+            node {
+                echo 'Pipeline succeeded!'
+            }
         }
     }
 }
