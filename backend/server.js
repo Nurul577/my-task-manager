@@ -8,7 +8,7 @@ import taskRoutes from "./routes/taskRoutes.js";
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const secret = process.env.COOKIE_SECRET;
 const frontendBaseURL = process.env.FRONTEND_BASE_URL;
 

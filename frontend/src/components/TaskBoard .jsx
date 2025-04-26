@@ -17,7 +17,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 axios.defaults.withCredentials = true;
 
 const API_URL =
-  import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:3000";
+  import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:5000";
 
 const TaskDetailModal = ({ task, onClose }) => (
   <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">

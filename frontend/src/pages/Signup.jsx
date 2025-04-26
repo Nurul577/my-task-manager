@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import OAuth from "../components/OAuth";
 
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:3000";
+const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:5000";
 
 const createUser = async (userData) => {
   try {
