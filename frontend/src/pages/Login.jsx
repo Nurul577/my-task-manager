@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import OAuth from "../components/OAuth";
 
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL;
+const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:3000";
 
 const loginUser = async (userData) => {
   const { data } = await axios.post(`${baseURL}/api/v1/user/login`, userData);

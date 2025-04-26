@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../redux/features/auth/authSlice";
 
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL;
+const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:3000";
 
 const logoutUser = async () => {
   const { data } = await axios.post(`${baseURL}/api/v1/user/logout`);

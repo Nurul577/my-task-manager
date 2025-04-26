@@ -11,12 +11,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import OAuth from "../components/OAuth";
 
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL;
+const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:3000";
 
 const createUser = async (userData) => {
-  const { data } = await axios.post(`${baseURL}/api/v1/user/signup`, userData);
-  return data;
+  try {
+    const { data } = await axios.post(`${baseURL}/api/v1/user/signup`, userData);
+    return data;
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    throw error; // Rethrow to handle in `useMutation`
+  }
 };
+
 
 const signupSchema = z
   .object({
