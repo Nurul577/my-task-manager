@@ -14,6 +14,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Copy the entire frontend source code
+# Copy the entire frontend source code
 COPY . .
 
 # Build the Vite React app for production
