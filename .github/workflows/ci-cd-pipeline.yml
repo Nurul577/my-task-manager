@@ -1,0 +1,90 @@
+name: MERN Stack CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger the pipeline on push to the main branch
+  pull_request:
+    branches:
+      - main # Trigger the pipeline on PR to the main branch
+
+jobs:
+  # Frontend Job
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install dependencies for Frontend
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Build Frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Build Docker Image for Frontend
+      working-directory: ./frontend
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend-image:latest .
+      
+    - name: Login to Docker Hub
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+    - name: Push Frontend Docker Image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/frontend-image:latest
+
+  # Backend Job
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install dependencies for Backend
+      working-directory: ./backend
+      run: npm install
+
+    - name: Build Docker Image for Backend
+      working-directory: ./backend
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/backend-image:latest .
+
+    - name: Login to Docker Hub
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+    - name: Push Backend Docker Image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/backend-image:latest
+
+  # Deployment (Optional, can deploy to server or cloud)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [frontend, backend] # Ensure frontend and backend build and push are successful
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Pull Backend Docker Image
+      run: docker pull ${{ secrets.DOCKER_USERNAME }}/backend-image:latest
+
+    - name: Pull Frontend Docker Image
+      run: docker pull ${{ secrets.DOCKER_USERNAME }}/frontend-image:latest
+
+    - name: Deploy Backend and Frontend
+      run: |
+        docker run -d -p 5000:5000 ${{ secrets.DOCKER_USERNAME }}/backend-image:latest
+        docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/frontend-image:latest
