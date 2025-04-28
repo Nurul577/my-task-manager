@@ -58,28 +58,23 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            node {
-                echo 'Pipeline execution completed.'
-                script {
-                    try {
-                        bat 'docker-compose -f docker-compose.yml down'
-                    } catch (Exception e) {
-                        echo "Warning: Failed to stop containers: ${e.message}"
-                    }
-                }
-            }
-        }
-        failure {
-            node {
-                echo 'Pipeline failed! Cleaning up...'
-            }
-        }
-        success {
-            node {
-                echo 'Pipeline succeeded!'
+  post {
+    always {
+        echo 'Pipeline execution completed.'
+        script {
+            try {
+                bat 'docker-compose -f docker-compose.yml down'
+            } catch (Exception e) {
+                echo "Warning: Failed to stop containers: ${e.message}"
             }
         }
     }
+    failure {
+        echo 'Pipeline failed! Cleaning up...'
+    }
+    success {
+        echo 'Pipeline succeeded!'
+    }
+}
+
 }
